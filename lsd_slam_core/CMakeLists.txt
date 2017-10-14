@@ -1,6 +1,49 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(lsd_slam_core)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+#include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+
+# SSE flags
+#rosbuild_check_for_sse()
+add_definitions("-DUSE_ROS")
+add_definitions("-DENABLE_SSE")
+
+# Also add some useful compiler flag
+set(CMAKE_CXX_FLAGS
+   "${CMAKE_CXX_FLAGS} ${SSE_FLAGS} -march=native  -std=c++0x"
+) 
+#set(ROS_BUILD_TYPE Release)
+#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+#set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+#set(CMAKE_MODULE_PATH   ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+find_package(catkin REQUIRED
+  roscpp
+  gencpp
+  rospy
+  genpy
+  rosbag # for main_bagfile_driver
+  cmake_modules
+  cv_bridge
+  eigen_conversions
+  geometry_msgs
+  sensor_msgs
+  image_geometry
+  image_transport
+  nodelet
+  std_msgs
+  tf
+  tf2
+  tf2_ros
+  cmake_modules
+  lsd_slam_viewer
+  dynamic_reconfigure)
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED)
+find_package(OpenCV REQUIRED)
+#find_package(sophus REQUIRED)
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -8,17 +51,22 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Release)
 
-rosbuild_init() 
+#rosbuild_init() 
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-set(CMAKE_MODULE_PATH   ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-
+find_package(cmake_modules REQUIRED)   
 find_package(Eigen3 REQUIRED)
 find_package(SuiteParse REQUIRED) # Apparently needed by g2o
 find_package(X11 REQUIRED)
+find_package(G2O REQUIRED)
+
+generate_dynamic_reconfigure_options(cfg/LSDDebugParams.cfg cfg/LSDParams.cfg)
+
+if(G2O_FOUND)
+  message(STATUS "Found G2O")
+else()
+  message(ERROR "G2O missing")
+endif()
 
 # FabMap
 # uncomment this part to enable fabmap
@@ -27,20 +75,18 @@ find_package(X11 REQUIRED)
 #add_definitions("-DHAVE_FABMAP")
 #set(FABMAP_LIB openFABMAP )
 
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES rgbd_drivers_uncc
+#  CATKIN_DEPENDS other_catkin_pkg
+#  DEPENDS system_lib
+  DEPENDS Boost Eigen3 OpenCV 
+  LIBRARIES ${PROJECT_NAME}
+)
 # Dynamic Reconfigure Services
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
-
-# SSE flags
-rosbuild_check_for_sse()
-add_definitions("-DUSE_ROS")
-add_definitions("-DENABLE_SSE")
-
-# Also add some useful compiler flag
-set(CMAKE_CXX_FLAGS
-   "${CMAKE_CXX_FLAGS} ${SSE_FLAGS} -march=native  -std=c++0x"
-) 
+#rosbuild_find_ros_package(dynamic_reconfigure)
+#include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
+#gencfg()
 
 # Set source files
 set(lsd_SOURCE_FILES
@@ -72,27 +118,58 @@ set(SOURCE_FILES
   ${PROJECT_SOURCE_DIR}/src/IOWrapper/OpenCV/ImageDisplay_OpenCV.cpp
 )
 
-include_directories(
-  ${EIGEN3_INCLUDE_DIR}
+include_directories(AFTER
+  ${PROJECT_SOURCE_DIR}/cfg/cpp
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
+  ${G2O_INCLUDE_DIR}
+  ${EIGEN3_INCLUDE_DIR}
   ${CSPARSE_INCLUDE_DIR} #Has been set by SuiteParse
   ${CHOLMOD_INCLUDE_DIR} #Has been set by SuiteParse
 )
 
 
 # build shared library.
-rosbuild_add_library(lsdslam SHARED ${SOURCE_FILES})
-target_link_libraries(lsdslam ${FABMAP_LIB} g2o_core g2o_stuff csparse cxsparse g2o_solver_csparse g2o_csparse_extension g2o_types_sim3 g2o_types_sba X11)
-rosbuild_link_boost(lsdslam thread)
+add_library(lsdslam 
+  SHARED 
+  ${SOURCE_FILES})
+add_dependencies(lsdslam ${PROJECT_NAME}_gencfg)# ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
+target_link_libraries(lsdslam 
+   ${FABMAP_LIB} 
+   ${catkin_LIBRARIES} 
+   ${Boost_LIBRARIES}
+   ${OpenCV_LIBRARIES}  
+   ${Eigen3_LIBRARIES}  
+   ${G2O_CORE_LIBRARY}
+   ${G2O_SOLVER_DENSE}
+   ${G2O_SOLVER_EIGEN}
+   ${G2O_TYPES_SLAM3D}
+   ${G2O_TYPES_SBA}
+   ${G2O_SOLVER_CSPARSE}
+   ${G2O_SOLVER_CSPARSE_EXTENSION}
+   csparse cxsparse X11)
+#rosbuild_link_boost(lsdslam thread)
 
 
 # build live ros node
-rosbuild_add_executable(live_slam src/main_live_odometry.cpp)
-target_link_libraries(live_slam lsdslam)
+add_executable(live_slam 
+  src/main_live_odometry.cpp)
+add_dependencies(live_slam ${PROJECT_NAME}_gencfg)# ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
+target_link_libraries(live_slam 
+  ${catkin_LIBRARIES} 
+  ${Boost_LIBRARIES}
+  ${OpenCV_LIBRARIES}  
+  ${Eigen3_LIBRARIES}  
+  lsdslam)
 
 
 # build image node
-rosbuild_add_executable(dataset_slam src/main_on_images.cpp)
-target_link_libraries(dataset_slam lsdslam)
+add_executable(dataset_slam src/main_on_images.cpp)
+add_dependencies(dataset_slam ${PROJECT_NAME}_gencfg)# ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(dataset_slam 
+  ${catkin_LIBRARIES} 
+  ${Boost_LIBRARIES}
+  ${OpenCV_LIBRARIES}  
+  ${Eigen3_LIBRARIES}  
+  lsdslam)
 
