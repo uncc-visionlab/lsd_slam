@@ -184,7 +184,7 @@ int inlayVid3( int argc, char** argv )
 
 
 
-	printf("pcFiles: %d, odometry: idepth: %d, var: %d, org: %d, age: %d\n",
+	printf("pcFiles: %lu, odometry: idepth: %lu, var: %lu, org: %lu, age: %lu\n",
 			pointcloudFiles.size(),
 			odometryFilesIdepth.size(),
 			odometryFilesVar.size(),
@@ -401,7 +401,7 @@ int inlayVidNew1( int argc, char** argv )
 
 	std::string target = "/home/engelj/fuerte_workspace/bags/videoData/stitched-slam8";
 
-	printf("pcFiles: %d, mapped: %d, tracked: %d\n",
+	printf("pcFiles: %lu, mapped: %lu, tracked: %lu\n",
 			pointcloudFiles.size(),
 			odometryFilesMapped.size(),
 			odometryFilesTracked.size());
@@ -496,7 +496,7 @@ int inlayVid( int argc, char** argv )
 
 
 
-	printf("pcFiles: %d, odometry: age: %d, idepth: %d, stereo: %d, var: %d\n",
+	printf("pcFiles: %lu, odometry: age: %lu, idepth: %lu, stereo: %lu, var: %lu\n",
 			pointcloudFiles.size(),
 			odometryFilesAge.size(),
 			odometryFilesIdepth.size(),
