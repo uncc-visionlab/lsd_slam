@@ -1,25 +1,12 @@
 cmake_minimum_required(VERSION 2.4.6)
 project(lsd_slam_viewer)
-#include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE Release)
 
 # NOTES
-# sudo apt-get -y install libqglviewer-dev
-
-#rosbuild_init()
+# sudo apt-get -y purge libqglviewer2 libqglviewer-dev
+# sudo apt-get -y install libqglviewer2-qt4 libqglviewer-dev-qt4
 
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/thirdparty/Sophus)
 
-#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(catkin REQUIRED
@@ -130,9 +117,10 @@ target_link_libraries(viewer
    ${Eigen3_LIBRARIES}
    ${QGLViewer_LIBRARIES}
    ${QT_LIBRARIES} 
-   ${QGLVIEWER_LIBRARY} 
+#   ${QGLVIEWER_LIBRARY} 
    ${OPENGL_LIBRARIES}  
-   ${GLUT_LIBRARIES})
+   ${GLUT_LIBRARIES}
+   QGLViewer-qt4)
 
 add_executable(videoStitch src/main_stitchVideos.cpp)
 add_dependencies(videoStitch ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
@@ -143,6 +131,7 @@ target_link_libraries(videoStitch
    ${Eigen3_LIBRARIES}
    ${QGLViewer_LIBRARIES}
    ${QT_LIBRARIES} 
-   ${QGLVIEWER_LIBRARY} 
+#   ${QGLVIEWER_LIBRARY} 
    ${OPENGL_LIBRARIES}  
-   ${GLUT_LIBRARIES})
+   ${GLUT_LIBRARIES}
+   QGLViewer-qt4)
