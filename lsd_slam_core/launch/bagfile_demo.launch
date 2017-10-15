@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    
+    <arg name="camera" default="camera" />
+    <arg name="run_lsd_slam" default="true" />
+    <arg name="run_lsd_slam_viewer" default="false" />
+    <arg name="run_rviz" default="true" />
+    <arg name="play_bagfile" default="true" />
+
+    <arg name="driver_cv_camera" default="false" />
+    <arg name="driver_openni2" default="false" />
+    <arg name="driver_astra" default="false" />
+
+    <node name="live_slam" pkg="lsd_slam_core" 
+          type="live_slam" output="screen" if="$(arg run_lsd_slam)">
+        <remap from="/camera_info" to="/cv_camera_node/camera_info" if="$(arg driver_cv_camera)"/>
+        <remap from="/image" to="/cv_camera_node/image_raw" if="$(arg driver_cv_camera)"/>
+        <remap from="/camera_info" to="/camera/rgb/camera_info" if="$(arg driver_openni2)"/>
+        <remap from="/image" to="/camera/rgb/image_raw" if="$(arg driver_openni2)"/>             
+        <remap from="/camera_info" to="/camera/rgb/camera_info" if="$(arg driver_astra)"/>
+        <remap from="/image" to="/camera/rgb/image_raw" if="$(arg driver_astra)"/>             
+        <remap from="/camera_info" to="/camera_info" if="$(arg play_bagfile)"/>
+        <remap from="/image" to="/image_raw" if="$(arg play_bagfile)"/>             
+    </node>     
+
+    <node name="viewer" pkg="lsd_slam_viewer" 
+          type="viewer" output="screen" if="$(arg run_lsd_slam_viewer)">
+    </node>  
+
+    <group if="$(arg driver_openni2)">
+        <include file="$(find openni2_launch)/launch/openni2.launch"/>
+    </group>
+
+    <group if="$(arg driver_astra)">
+        <include file="$(find astra_launch)/launch/astra.launch"/>
+    </group>
+
+    <node name="cv_camera_node" pkg="cv_camera" 
+          type="cv_camera_node" output="screen" if="$(arg driver_cv_camera)">    
+    </node>        
+
+    <arg name="rviz_config_file" default="lsd_slam.rviz" />    
+    <node pkg="rviz" type="rviz" name="rviz" output="screen" 
+          args="-d $(find lsd_slam_core)/rviz/$(arg rviz_config_file)" if="$(arg run_rviz)"/>
+
+          <param name="use_sim_time" value = "true" if="$(arg play_bagfile)"/>
+    
+    <!-- BEGIN Play from .bag file sensor configuration -->
+    <arg name="path" default="$(find lsd_slam_core)" />
+    <arg name="file_1" default="LSD_room.bag" />
+    <arg name="file_2" default="" />
+    <arg name="file_3" default=""/>
+    <arg name="bag_delay" default="5" />
+    <node pkg="rosbag" type="play" name="player" output="screen" 
+          args="--delay=$(arg bag_delay) --rate=1 --quiet --clock /home/arwillis/freiburg_data/$(arg file_1) "
+          if="$(arg play_bagfile)"/>
+    <!-- END Play from .bag file sensor configuration -->
+
+
+</launch>
