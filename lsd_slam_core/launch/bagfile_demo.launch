@@ -6,6 +6,8 @@
     <arg name="run_lsd_slam_viewer" default="false" />
     <arg name="run_rviz" default="true" />
     <arg name="play_bagfile" default="true" />
+    <arg name="record_bagfile" default="true" />
+    <arg name="savefile" default="/home/arwillis/lsd_slam_output.bag" />
 
     <arg name="driver_cv_camera" default="false" />
     <arg name="driver_openni2" default="false" />
@@ -39,11 +41,13 @@
           type="cv_camera_node" output="screen" if="$(arg driver_cv_camera)">    
     </node>        
 
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
+
     <arg name="rviz_config_file" default="lsd_slam.rviz" />    
     <node pkg="rviz" type="rviz" name="rviz" output="screen" 
           args="-d $(find lsd_slam_core)/rviz/$(arg rviz_config_file)" if="$(arg run_rviz)"/>
 
-          <param name="use_sim_time" value = "true" if="$(arg play_bagfile)"/>
+    <param name="use_sim_time" value = "true" if="$(arg play_bagfile)"/>
     
     <!-- BEGIN Play from .bag file sensor configuration -->
     <arg name="path" default="$(find lsd_slam_core)" />
@@ -56,5 +60,11 @@
           if="$(arg play_bagfile)"/>
     <!-- END Play from .bag file sensor configuration -->
 
+    <arg name="bag_topics" 
+         default="/lsd_slam/graph /lsd_slam/keyframes /lsd_slam/liveframes"/> 
+
+    <node pkg="rosbag" type="record" name="recorder" output="screen" 
+          args="record -o $(arg savefile) $(arg bag_topics)"
+          if="$(arg record_bagfile)"/>
 
 </launch>
