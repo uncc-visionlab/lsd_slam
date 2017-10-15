@@ -29,8 +29,6 @@ find_package(catkin REQUIRED
   genpy
   rosbag # for main_bagfile_driver
   cmake_modules
-  cv_bridge
-  eigen_conversions
   geometry_msgs
   sensor_msgs
   image_geometry
@@ -53,6 +51,8 @@ find_package(QGLViewer REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 generate_dynamic_reconfigure_options(cfg/LSDSLAMViewerParams.cfg)
 
@@ -71,7 +71,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES uncc_rgbd_slam
   CATKIN_DEPENDS message_runtime
-  DEPENDS Boost Eigen3 OpenCV 
+  DEPENDS Boost OpenCV 
   LIBRARIES ${PROJECT_NAME}
 )
 
@@ -83,19 +83,10 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${QT_INCLUDES} 
-  ${EIGEN3_INCLUDE_DIRS} 
+  ${EIGEN3_INCLUDE_DIRS}
+  ${OPENCV_INCLUDE_DIR}
+  ${OPENGL_INCLUDE_DIR} 
   ${QGLVIEWER_INCLUDE_DIR})
-#include_directories(
-#  ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
-#)  
-
-#rosbuild_find_ros_package(dynamic_reconfigure)
-#include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-#gencfg()
-
-# Messages & Services
-#rosbuild_genmsg()
-
 
 # SSE flags
 #rosbuild_check_for_sse()
@@ -131,7 +122,6 @@ target_link_libraries(${PROJECT_NAME}
 add_executable(viewer 
     src/main_viewer.cpp ${SOURCE_FILES})
 add_dependencies(viewer ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
-#    ${HEADER_FILES})
 
 target_link_libraries(viewer 
    ${catkin_LIBRARIES}  
@@ -141,9 +131,8 @@ target_link_libraries(viewer
    ${QGLViewer_LIBRARIES}
    ${QT_LIBRARIES} 
    ${QGLVIEWER_LIBRARY} 
-   GL glut GLU)
-
-#rosbuild_link_boost(viewer thread)
+   ${OPENGL_LIBRARIES}  
+   ${GLUT_LIBRARIES})
 
 add_executable(videoStitch src/main_stitchVideos.cpp)
 add_dependencies(videoStitch ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
@@ -155,4 +144,5 @@ target_link_libraries(videoStitch
    ${QGLViewer_LIBRARIES}
    ${QT_LIBRARIES} 
    ${QGLVIEWER_LIBRARY} 
-   GL glut GLU)
+   ${OPENGL_LIBRARIES}  
+   ${GLUT_LIBRARIES})
