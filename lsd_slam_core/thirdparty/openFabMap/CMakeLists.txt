@@ -41,7 +41,10 @@ ADD_LIBRARY(openFABMAP SHARED ${OPENFABMAP_FILES} ${OPENFABMAP_INCS})
 ############ end openFABMAP library ##################
 
 # Tell CMake where the headers are
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include
+  /opt/ros/kinetic/include/opencv-3.2.0-dev/
+  ${OPENCV_INCLUDE_DIRS}
+)
 
 # Link against the required libraries in OpenCV >=2.2
 IF(OPENCV2_FOUND)
@@ -61,7 +64,8 @@ IF(OPENCV2_FOUND)
 			ENDFOREACH(LIB)
 		ENDIF(MINGW)
 	ELSE(WIN32)
-		TARGET_LINK_LIBRARIES(openFABMAP opencv_highgui opencv_core opencv_features2d opencv_imgproc opencv_nonfree)
+                link_directories(/opt/ros/kinetic/lib)
+                TARGET_LINK_LIBRARIES(openFABMAP ${OpenCV_LIBRARIES})
 	ENDIF(WIN32)
 ENDIF(OPENCV2_FOUND)
 

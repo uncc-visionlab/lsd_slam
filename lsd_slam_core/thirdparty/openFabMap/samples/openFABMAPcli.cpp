@@ -26,13 +26,16 @@
  OpenFABMAP. If not, see http://www.gnu.org/licenses/.
 ------------------------------------------------------------------------*/
 
-#define OPENCV2P4
-
 #include "../include/openfabmap.hpp"
-#include <fstream>
+
+#include <opencv2/opencv.hpp>
 #ifdef OPENCV2P4
-#include <opencv2/nonfree/nonfree.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #endif
+
+#include <fstream>
+#include <iostream>
 
 /*
 openFABMAP procedural functions
@@ -657,7 +660,7 @@ cv::Ptr<cv::FeatureDetector> generateDetector(cv::FileStorage &fs) {
 	} else if(detectorMode == "STATIC") {
 		if(detectorType == "STAR") {
 
-			detector = new cv::StarFeatureDetector(
+			detector = cv::xfeatures2d::StarDetector::create(
 				fs["FeatureOptions"]["StarDetector"]["MaxSize"],
 				fs["FeatureOptions"]["StarDetector"]["Response"],
 				fs["FeatureOptions"]["StarDetector"]["LineThreshold"],
