@@ -5,7 +5,7 @@
     <arg name="run_lsd_slam_viewer" default="true" />
     <arg name="play_bagfile" default="false" />
     <arg name="record_bagfile" default="false" />
-    <arg name="bagfile" default="/home/arwillis/lsd_slam_output_2017-10-15-10-24-46.bag" />
+    <arg name="bagfile" default="$(env HOME)/lsd_slam_output_2017-10-16-15-43-08.bag" />
 
     <node name="viewer" pkg="lsd_slam_viewer" 
           type="viewer" output="screen" 
@@ -17,18 +17,5 @@
     <arg name="rviz_config_file" default="lsd_slam.rviz" />    
     <node pkg="rviz" type="rviz" name="rviz" output="screen" 
           args="-d $(find lsd_slam_core)/rviz/$(arg rviz_config_file)" if="$(arg run_rviz)"/>
-
-    <param name="use_sim_time" value = "true" if="$(arg play_bagfile)"/>
     
-    <!-- BEGIN Play from .bag file sensor configuration -->
-    <arg name="path" default="$(find lsd_slam_core)" />
-    <arg name="file_1" default="LSD_room.bag" />
-    <arg name="file_2" default="" />
-    <arg name="file_3" default=""/>
-    <arg name="bag_delay" default="5" />
-    <node pkg="rosbag" type="play" name="player" output="screen" 
-          args="--delay=$(arg bag_delay) --rate=1 --quiet --clock /home/arwillis/freiburg_data/$(arg file_1) "
-          if="$(arg play_bagfile)"/>
-    <!-- END Play from .bag file sensor configuration -->
-
 </launch>
