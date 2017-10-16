@@ -5,16 +5,17 @@
     <arg name="run_lsd_slam" default="true" />
     <arg name="run_lsd_slam_viewer" default="false" />
     <arg name="run_rviz" default="true" />
-    <arg name="play_bagfile" default="true" />
+    <arg name="play_bagfile" default="false" />
     <arg name="record_bagfile" default="true" />
     <arg name="savefile" default="$(env HOME)/lsd_slam_output.bag" />
 
     <arg name="driver_cv_camera" default="false" />
     <arg name="driver_openni2" default="false" />
-    <arg name="driver_astra" default="false" />
+    <arg name="driver_astra" default="true" />
 
     <node name="live_slam" pkg="lsd_slam_core" 
           type="live_slam" output="screen" if="$(arg run_lsd_slam)">
+        <param name="calib" type="str" value="$(find lsd_slam_core)/rgbd_calib.txt"/>
         <remap from="/camera_info" to="/cv_camera_node/camera_info" if="$(arg driver_cv_camera)"/>
         <remap from="/image" to="/cv_camera_node/image_raw" if="$(arg driver_cv_camera)"/>
         <remap from="/camera_info" to="/camera/rgb/camera_info" if="$(arg driver_openni2)"/>
@@ -43,7 +44,7 @@
 
     <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
 
-    <arg name="rviz_config_file" default="lsd_slam.rviz" />    
+    <arg name="rviz_config_file" default="lsd_slam_live.rviz" />    
     <node pkg="rviz" type="rviz" name="rviz" output="screen" 
           args="-d $(find lsd_slam_core)/rviz/$(arg rviz_config_file)" if="$(arg run_rviz)"/>
 
