@@ -121,11 +121,11 @@ include_directories(AFTER
 
 
 # build shared library.
-add_library(lsdslam 
+add_library(lsd_slam_core 
   SHARED 
   ${SOURCE_FILES})
-add_dependencies(lsdslam ${PROJECT_NAME}_gencfg)
-target_link_libraries(lsdslam 
+add_dependencies(lsd_slam_core ${PROJECT_NAME}_gencfg)
+target_link_libraries(lsd_slam_core 
    ${FABMAP_LIB} 
    ${catkin_LIBRARIES} 
    ${Boost_LIBRARIES}
@@ -151,7 +151,7 @@ target_link_libraries(live_slam
   ${Boost_LIBRARIES}
   ${OpenCV_LIBRARIES}  
   ${Eigen3_LIBRARIES}  
-  lsdslam)
+  lsd_slam_core)
 
 # build image node
 add_executable(dataset_slam src/main_on_images.cpp)
@@ -161,5 +161,5 @@ target_link_libraries(dataset_slam
   ${Boost_LIBRARIES}
   ${OpenCV_LIBRARIES}  
   ${Eigen3_LIBRARIES}  
-  lsdslam)
+  lsd_slam_core)
 
