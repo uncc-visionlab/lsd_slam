@@ -94,7 +94,7 @@ public:
 	 * outputWidth outputHeight
 	 */
 	UndistorterPTAM(const char* configFileName);
-	
+        UndistorterPTAM(std::string l1, std::string l2, std::string l3, std::string l4);
 	/**
 	 * Destructor.
 	 */
@@ -144,6 +144,7 @@ public:
 	 */
 	bool isValid() const;
 	
+	void parseStrings(std::string l1, std::string l2, std::string l3, std::string l4, const char* configFileName);
 private:
 	cv::Mat K_;
 	cv::Mat originalK_;
@@ -174,7 +175,8 @@ public:
 	 * outputWidth outputHeight
 	 */
 	UndistorterOpenCV(const char* configFileName);
-	
+	UndistorterOpenCV(std::string l1, std::string l2, std::string l3, std::string l4);
+
 	/**
 	 * Destructor.
 	 */
@@ -224,6 +226,7 @@ public:
 	 */
 	bool isValid() const;
 	
+	void parseStrings(std::string l1, std::string l2, std::string l3, std::string l4, const char* configFileName);
 private:
 	cv::Mat K_;
 	cv::Mat originalK_;

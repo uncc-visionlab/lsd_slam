@@ -90,10 +90,6 @@ Undistorter* Undistorter::getUndistorterForFile(const char* configFilename)
 
 UndistorterPTAM::UndistorterPTAM(const char* configFileName)
 {
-	valid = true;
-
-	remapX = nullptr;
-	remapY = nullptr;
 
 	
 	
@@ -109,8 +105,20 @@ UndistorterPTAM::UndistorterPTAM(const char* configFileName)
 	std::getline(infile,l3);
 	std::getline(infile,l4);
 
+        parseStrings(l1, l2, l3, l4, configFileName);
+}
 
+UndistorterPTAM::UndistorterPTAM(std::string l1, std::string l2, std::string l3, std::string l4)
+{
+        parseStrings(l1, l2, l3, l4, "null");
+}
 
+void UndistorterPTAM::parseStrings(std::string l1, std::string l2, std::string l3, std::string l4, const char* configFileName)
+{
+    	valid = true;
+
+	remapX = nullptr;
+	remapY = nullptr;
 
 	// l1 & l2
 	if(std::sscanf(l1.c_str(), "%f %f %f %f %f", &inputCalibration[0], &inputCalibration[1], &inputCalibration[2], &inputCalibration[3], &inputCalibration[4]) == 5 &&
@@ -447,9 +455,7 @@ bool UndistorterPTAM::isValid() const
 
 
 UndistorterOpenCV::UndistorterOpenCV(const char* configFileName)
-{
-	valid = true;
-	
+{	
 	// read parameters
 	std::ifstream infile(configFileName);
 	assert(infile.good());
@@ -460,8 +466,18 @@ UndistorterOpenCV::UndistorterOpenCV(const char* configFileName)
 	std::getline(infile,l2);
 	std::getline(infile,l3);
 	std::getline(infile,l4);
+        parseStrings(l1, l2, l3, l4, configFileName);
+}
 
-	// l1 & l2
+UndistorterOpenCV::UndistorterOpenCV(std::string l1, std::string l2, std::string l3, std::string l4)
+{
+        parseStrings(l1, l2, l3, l4, "null");
+}
+
+void UndistorterOpenCV::parseStrings(std::string l1, std::string l2, std::string l3, std::string l4, const char* configFileName)
+{
+	valid = true;
+        // l1 & l2
 	if(std::sscanf(l1.c_str(), "%f %f %f %f %f %f %f %f",
 		&inputCalibration[0], &inputCalibration[1], &inputCalibration[2], &inputCalibration[3], &inputCalibration[4],
 		&inputCalibration[5], &inputCalibration[6], &inputCalibration[7]
